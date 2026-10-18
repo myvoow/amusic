@@ -48,6 +48,8 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 	private lateinit var scrobbleManager: AndroidScrobbleManager
 
+	private lateinit var autoMix: AutoMixController
+
 	override fun onCreate() {
 		super.onCreate()
 		exoEqualizerManager = ExoEqualizerManager(
@@ -77,6 +79,9 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 			player.addListener(exoEqualizerManager)
 
+			autoMix = AutoMixController(stateHolder, preferenceManager)
+			player.addListener(autoMix)
+
 			exoEqualizerManager.apply {
 				applyEqualizerMode(equalizerManager.config.value.mode)
 				scope.launch(Dispatchers.Main) {
@@ -95,6 +100,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 	}
 
 	override fun onDestroy() {
+		autoMix.release()
 		exoEqualizerManager.releaseEqualizer()
 		scrobbleManager.release()
 		serviceScope.cancel()

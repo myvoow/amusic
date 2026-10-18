@@ -149,7 +149,7 @@ class ExoStateHolder: KoinComponent {
 			}
 		}
 
-	private fun createRenderers(context: Context): RenderersFactory {
+	private fun createRenderers(context: Context, gainProcessor: ExoAudioGainProcessor = this.gainProcessor): RenderersFactory {
 		return RenderersFactory { handler, _, audioListener, _, _ ->
             arrayOf<BaseRenderer>(
                 FfmpegAudioRenderer(
@@ -261,6 +261,28 @@ class ExoStateHolder: KoinComponent {
 			}
 
 		return playerInstance
+	}
+
+	/**
+	 * AutoMix's second player: plays the next song over the end of the current one.
+	 * No audio focus, no session; same audio session id so the equalizer covers both players.
+	 */
+	fun createMixPlayer(gainProcessor: ExoAudioGainProcessor): ExoPlayer = ExoPlayer.Builder(
+		context,
+		createRenderers(context, gainProcessor)
+	).apply {
+		setMediaSourceFactory(
+			DefaultMediaSourceFactory(DefaultDataSource.Factory(context, httpDataSourceFactory), extractorsFactory)
+		)
+	}.build().apply {
+		setAudioAttributes(
+			AudioAttributes.Builder()
+				.setUsage(C.USAGE_MEDIA)
+				.setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+				.build(),
+			false
+		)
+		setAudioSessionId(playerInstance.audioSessionId)
 	}
 
 	private suspend fun createMediaSession(): MediaSession = mutex.withLock {

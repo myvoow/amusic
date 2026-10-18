@@ -8,6 +8,7 @@ package paige.navic.shared
 
 import android.app.Application
 import android.content.Intent
+import android.os.Bundle
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import paige.navic.data.database.dao.AlbumDao
 import paige.navic.data.database.mapper.toDomainModel
 import paige.navic.domain.manager.AudioGainManager
@@ -46,6 +48,7 @@ import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.domain.repository.PlayerStateRepository
 import paige.navic.domain.repository.SongRepository
+import paige.navic.exoplayer.AutoMixController
 import paige.navic.exoplayer.ExoStateHolder
 import paige.navic.ui.core.PlayerUiState
 import paige.navic.util.Logger
@@ -731,6 +734,14 @@ class AndroidMediaPlayerViewModel(
 			.setAlbumTitle(albumTitle)
 			.setDurationMs(duration.inWholeMilliseconds)
 			.setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+			// read by AutoMixController in the playback service
+			.setGenre(genre)
+			.setTrackNumber(trackNumber)
+			.setDiscNumber(discNumber)
+			.setExtras(Bundle().apply {
+				putString(AutoMixController.EXTRA_ALBUM_ID, albumId)
+				replayGain?.let { putString(AutoMixController.EXTRA_REPLAY_GAIN, Json.encodeToString(it)) }
+			})
 
 		metadataBuilder.setArtworkUri(
 			coverArtId?.let { sessionManager.getCoverArtUrl(it).toUri() }

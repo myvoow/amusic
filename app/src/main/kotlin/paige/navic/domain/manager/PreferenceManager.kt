@@ -14,6 +14,7 @@ import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainPlaylistListType
 import paige.navic.domain.model.DomainSongListType
+import paige.navic.exoplayer.TrackTransition
 import paige.navic.domain.model.settings.AnimationStyle
 import paige.navic.domain.model.settings.AppIconVariant
 import paige.navic.domain.model.settings.ArtistAlbumViewMode
@@ -72,6 +73,8 @@ class PreferenceManager(
 	var replayGainMode by preference(ReplayGainMode.Off)
 	var rgAmpGain by preference(0f)
 	var ampGain by preference(0f)
+	var trackTransition by preference(TrackTransition.AutoMix)
+	var autoMixUrl by preference("") // automix.json address, empty = AutoMix off
 	var gaplessPlayback by preference(true)
 	var audioOffload by preference(false)
 
