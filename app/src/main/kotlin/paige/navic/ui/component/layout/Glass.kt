@@ -47,7 +47,7 @@ fun Modifier.glass(
 		shape = { shape },
 		effects = {
 			vibrancy()
-			blur(8.dp.toPx())
+			blur(2.dp.toPx()) // light blur, the lens does the work (like Kyant's LiquidButton)
 			// Kyant's values (24 dp on a 64 dp bar); refraction must stay below the corner radius
 			lens(size.minDimension * 0.375f, 24.dp.toPx())
 		},

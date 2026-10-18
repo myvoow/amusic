@@ -243,7 +243,7 @@ fun LiquidBottomTabs(
 					shape = { CircleShape },
 					effects = {
 						vibrancy()
-						blur(8f.dp.toPx())
+						blur(2f.dp.toPx()) // Navic: light blur so the refraction shows, as on LiquidButton
 						lens(24f.dp.toPx(), 24f.dp.toPx())
 					},
 					layerBlock = {
@@ -281,7 +281,7 @@ fun LiquidBottomTabs(
 						effects = {
 							val progress = dampedDragAnimation.pressProgress
 							vibrancy()
-							blur(8f.dp.toPx())
+							blur(2f.dp.toPx()) // Navic: light blur so the refraction shows, as on LiquidButton
 							lens(
 								24f.dp.toPx() * progress,
 								24f.dp.toPx() * progress
@@ -318,7 +318,8 @@ fun LiquidBottomTabs(
 					backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
 					shape = { CircleShape },
 					effects = {
-						val progress = dampedDragAnimation.pressProgress
+						// Navic: the indicator stays a lens at rest, it only grows when pressed
+						val progress = dampedDragAnimation.pressProgress.coerceAtLeast(0.5f)
 						lens(
 							10f.dp.toPx() * progress,
 							14f.dp.toPx() * progress,
@@ -326,7 +327,7 @@ fun LiquidBottomTabs(
 						)
 					},
 					highlight = {
-						val progress = dampedDragAnimation.pressProgress
+						val progress = dampedDragAnimation.pressProgress.coerceAtLeast(0.5f)
 						Highlight.Default.copy(alpha = progress)
 					},
 					shadow = {
