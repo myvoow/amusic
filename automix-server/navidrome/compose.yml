@@ -1,0 +1,33 @@
+services:
+  # Caddy in front: serves /automix.json, everything else goes to Navidrome (service "app")
+  navidrome:
+    image: caddy:2-alpine
+    container_name: navidrome
+    restart: unless-stopped
+    ports:
+      - 4533:4533
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /home/myvo/automix/out:/srv:ro
+    depends_on:
+      - app
+  app:
+    image: deluan/navidrome:latest
+    container_name: navidrome-app
+    user: 1000:1000
+    restart: unless-stopped
+    environment:
+      ND_LOGLEVEL: info
+      ND_SCANSCHEDULE: 1h
+    volumes:
+      - ./data:/data
+      - /ssdcaca/shared/Musique:/music:ro
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: navidrome-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    depends_on:
+      - navidrome

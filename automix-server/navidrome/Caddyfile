@@ -1,0 +1,12 @@
+:4533 {
+	# AutoMix data next to Navidrome, same URL locally and through the tunnel
+	handle /automix.json {
+		root * /srv
+		file_server
+	}
+	handle {
+		reverse_proxy app:4533 {
+			flush_interval -1
+		}
+	}
+}
