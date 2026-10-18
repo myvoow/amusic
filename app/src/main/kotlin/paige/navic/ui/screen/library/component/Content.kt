@@ -99,33 +99,29 @@ fun LibraryScreenContent(
 		modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 		columns = GridCells.Fixed(2),
 		contentPadding = innerPadding.withoutTop() + PaddingValues(top = 8.dp),
-		verticalArrangement = Arrangement.spacedBy(5.dp),
+		verticalArrangement = Arrangement.Top,
 		horizontalArrangement = Arrangement.spacedBy(5.dp),
 		state = state
 	) {
 		libraryScreenOverviewButton(
 			icon = Icons.Outlined.LibraryAdd,
 			label = R.string.option_sort_newest,
-			destination = Screen.AlbumList(true, DomainAlbumListType.Newest),
-			start = true
+			destination = Screen.AlbumList(true, DomainAlbumListType.Newest)
 		)
 		libraryScreenOverviewButton(
 			icon = Icons.Outlined.Shuffle,
 			label = R.string.option_sort_random,
-			destination = Screen.AlbumList(true, DomainAlbumListType.Random),
-			start = false
+			destination = Screen.AlbumList(true, DomainAlbumListType.Random)
 		)
 		libraryScreenOverviewButton(
 			icon = Icons.Outlined.Star,
 			label = R.string.option_sort_starred,
-			destination = Screen.Starred(),
-			start = true
+			destination = Screen.Starred()
 		)
 		libraryScreenOverviewButton(
 			icon = Icons.Outlined.History,
 			label = R.string.option_sort_frequent,
-			destination = Screen.AlbumList(true, DomainAlbumListType.Frequent),
-			start = false
+			destination = Screen.AlbumList(true, DomainAlbumListType.Frequent)
 		)
 
 		horizontalSection(

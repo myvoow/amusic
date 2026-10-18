@@ -78,8 +78,8 @@ fun LazyGridScope.header(
 	item(span = { GridItemSpan(1) }) {
 		Text(
 			stringResource(title, formatArgs),
-			style = MaterialTheme.typography.titleMediumEmphasized,
-			fontWeight = FontWeight(600),
+			style = MaterialTheme.typography.titleLarge,
+			fontWeight = FontWeight.Bold,
 			modifier = Modifier
 				.heightIn(min = 32.dp)
 				.padding(top = 12.dp, start = 16.dp)
