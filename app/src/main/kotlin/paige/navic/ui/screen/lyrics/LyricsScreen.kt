@@ -12,7 +12,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +27,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -46,6 +52,9 @@ import paige.navic.ui.screen.lyrics.component.LyricsScreenLoadingView
 import paige.navic.ui.screen.lyrics.component.LyricsScreenPlaceholder
 import paige.navic.ui.screen.lyrics.component.LyricsScreenToolbar
 import paige.navic.ui.screen.lyrics.dialog.LyricsShareSheet
+import paige.navic.ui.screen.nowPlaying.component.controls.NowPlayingProgressBar
+import paige.navic.ui.screen.nowPlaying.component.rows.NowPlayingButtonsRow
+import paige.navic.ui.screen.nowPlaying.component.rows.NowPlayingDurationsRow
 import paige.navic.ui.screen.lyrics.viewmodel.LyricsScreenViewModel
 import paige.navic.ui.util.KeepScreenOn
 
@@ -120,14 +129,21 @@ fun LyricsScreen(
 				isSelecting = isSelecting,
 				toggleIsSelecting = toggleIsSelecting,
 				windowInsets = windowInsets,
-				selectedIndices = selectedIndices.toImmutableList()
+				selectedIndices = selectedIndices.toImmutableList(),
+				song = song
 			)
 		},
 		toolbarPosition = ToolbarPosition.Top
 	) { contentPadding ->
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(bottom = contentPadding.calculateBottomPadding()),
+			horizontalAlignment = Alignment.CenterHorizontally
+		) {
 		AnimatedContent(
 			targetState = lyricsState,
-			modifier = Modifier.fillMaxSize(),
+			modifier = Modifier.weight(1f).fillMaxWidth(),
 			transitionSpec = {
 				ContentTransform(
 					targetContentEnter = fadeIn(effectSpec) + scaleIn(spatialSpec, 0.8f),
@@ -157,10 +173,19 @@ fun LyricsScreen(
 						},
 						duration = duration,
 						currentDuration = currentDuration,
-						contentPadding = contentPadding
+						contentPadding = PaddingValues(top = contentPadding.calculateTopPadding())
 					)
 				}
 			}
+		}
+		// iOS: playback controls stay under the lyrics
+		if (!isSelecting) {
+			Column(Modifier.padding(horizontal = 8.dp)) {
+				NowPlayingProgressBar()
+				NowPlayingDurationsRow()
+			}
+			NowPlayingButtonsRow()
+		}
 		}
 
 		if (shareSheetOpen) {
