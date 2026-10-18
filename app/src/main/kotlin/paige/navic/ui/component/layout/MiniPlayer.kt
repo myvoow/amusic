@@ -216,7 +216,7 @@ fun MiniPlayer(
 							modifier = Modifier.size(28.dp)
 						)
 					}
-					if (!compact) {
+					AnimatedVisibility(visible = !compact) {
 						IconButton(
 							onClick = {
 								player.next()
