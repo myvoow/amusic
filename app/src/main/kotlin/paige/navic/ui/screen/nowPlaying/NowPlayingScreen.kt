@@ -6,20 +6,24 @@
 
 package paige.navic.ui.screen.nowPlaying
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,6 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -43,13 +50,6 @@ import paige.navic.domain.model.settings.ToolbarPosition
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.component.common.BlendBackground
 import paige.navic.ui.component.layout.SheetScaffold
-import paige.navic.ui.component.layout.TopBarButton
-import paige.navic.ui.component.toolbar.SheetActionButton
-import paige.navic.ui.component.toolbar.SheetToolbar
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.KeyboardArrowDown
-import paige.navic.ui.icons.outlined.List
-import paige.navic.ui.icons.outlined.Lyrics
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screen.nowPlaying.component.controls.NowPlayingArtworkPager
 import paige.navic.ui.screen.nowPlaying.component.rows.NowPlayingControlsRow
@@ -89,39 +89,13 @@ fun NowPlayingScreen() {
 
 	SheetScaffold(
 		toolbar = { windowInsets ->
-			SheetToolbar(
-				modifier = Modifier.alpha(if (isPlayerCurrent) 1f else 0f),
+			NowPlayingGrabber(
 				windowInsets = windowInsets,
-				title = {
-					Text(stringResource(R.string.title_now_playing))
-				},
-				navigationIcon = {
-					TopBarButton(
-						onClick = animateToDismiss,
-						content = {
-							Icon(
-								imageVector = Icons.Outlined.KeyboardArrowDown,
-								contentDescription = stringResource(R.string.action_navigate_back)
-							)
-						}
-					)
-				},
-				actions = {
-					SheetActionButton(
-						icon = Icons.Outlined.Lyrics,
-						contentDescription = stringResource(R.string.action_lyrics),
-						onClick = dropUnlessResumed { backStack.add(Screen.Lyrics) },
-						isStartRounded = true
-					)
-					SheetActionButton(
-						icon = Icons.Outlined.List,
-						contentDescription = stringResource(R.string.action_queue),
-						onClick = dropUnlessResumed { backStack.add(Screen.Queue) },
-						isEndRounded = true
-					)
-				}
+				onClick = animateToDismiss,
+				modifier = Modifier.alpha(if (isPlayerCurrent) 1f else 0f)
 			)
-		}
+		},
+		toolbarPosition = ToolbarPosition.Top
 	) { contentPadding ->
 		Box(Modifier.fillMaxSize()) {
 			if (preferenceManager.nowPlayingBackgroundStyle
@@ -133,33 +107,15 @@ fun NowPlayingScreen() {
 				)
 			}
 			if (!isPlayerCurrent) return@Box
-			BoxWithConstraints(
-				modifier = Modifier
-					.padding(horizontal = 8.dp)
-					.fillMaxSize()
-			) {
+			BoxWithConstraints(Modifier.fillMaxSize()) {
 				val isLandscape = maxWidth > maxHeight
-				val toolbarPosition = preferenceManager.nowPlayingToolbarPosition
-				val padding = when {
-					isLandscape -> contentPadding
-					toolbarPosition == ToolbarPosition.Top -> contentPadding.plus(
-						PaddingValues(
-							bottom = 40.dp
-						)
-					)
-
-					toolbarPosition == ToolbarPosition.Bottom -> contentPadding.plus(
-						PaddingValues(
-							top = 40.dp
-						)
-					)
-
-					else -> contentPadding
-				}
 				// TODO: figure out why artwork pager unnecessarily resizes when you drag the sheet
 				if (isLandscape) {
 					Row(
-						modifier = Modifier.fillMaxSize().padding(padding),
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(contentPadding)
+							.padding(horizontal = 8.dp),
 						horizontalArrangement = Arrangement.SpaceEvenly,
 						verticalAlignment = Alignment.CenterVertically
 					) {
@@ -169,7 +125,6 @@ fun NowPlayingScreen() {
 						)
 						NowPlayingControlsRow(
 							modifier = Modifier.weight(1f).fillMaxHeight(),
-							isLandscape = true,
 							songIsStarred = songIsStarred,
 							onSetSongIsStarred = { viewModel.starSong(it) },
 							songRating = songRating,
@@ -177,18 +132,19 @@ fun NowPlayingScreen() {
 						)
 					}
 				} else {
+					// iOS 26: edge-to-edge artwork at the top, fading into the cover colours
 					Column(
-						modifier = Modifier.fillMaxSize().padding(padding),
-						horizontalAlignment = Alignment.CenterHorizontally,
-						verticalArrangement = Arrangement.Center
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(bottom = contentPadding.calculateBottomPadding()),
+						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						NowPlayingArtworkPager(
-							modifier = Modifier.weight(1f).fillMaxWidth(),
+							modifier = Modifier.fillMaxWidth().aspectRatio(1f),
 							isLandscape = false
 						)
 						NowPlayingControlsRow(
-							modifier = Modifier.weight(1f),
-							isLandscape = false,
+							modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
 							songIsStarred = songIsStarred,
 							onSetSongIsStarred = { viewModel.starSong(it) },
 							songRating = songRating,
@@ -197,6 +153,36 @@ fun NowPlayingScreen() {
 					}
 				}
 			}
+		}
+	}
+}
+
+/** iOS sheet grabber; tapping it closes the player (keeps the old back button's accessibility). */
+@Composable
+private fun NowPlayingGrabber(
+	windowInsets: WindowInsets,
+	onClick: () -> Unit,
+	modifier: Modifier = Modifier
+) {
+	val label = stringResource(R.string.action_navigate_back)
+	Box(
+		modifier = modifier
+			.fillMaxWidth()
+			.windowInsetsPadding(windowInsets),
+		contentAlignment = Alignment.Center
+	) {
+		Box(
+			modifier = Modifier
+				.size(width = 72.dp, height = 48.dp)
+				.clickable(role = Role.Button, onClick = onClick)
+				.semantics { contentDescription = label },
+			contentAlignment = Alignment.Center
+		) {
+			Box(
+				Modifier
+					.size(width = 36.dp, height = 5.dp)
+					.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .5f), CircleShape)
+			)
 		}
 	}
 }

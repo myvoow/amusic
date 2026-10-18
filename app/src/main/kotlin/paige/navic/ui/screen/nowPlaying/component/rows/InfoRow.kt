@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import org.koin.compose.koinInject
@@ -86,10 +87,7 @@ fun NowPlayingInfoRow(
 								)
 						}
 					}),
-					style = MaterialTheme.typography.bodyLarge
-						.copy(
-							fontSize = MaterialTheme.typography.bodyLarge.fontSize * 1.1
-						),
+					style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
 				)
 			}
 			val notPlayingString = stringResource(R.string.info_not_playing)

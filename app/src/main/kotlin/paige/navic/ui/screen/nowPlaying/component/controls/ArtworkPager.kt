@@ -8,7 +8,6 @@ package paige.navic.ui.screen.nowPlaying.component.controls
 
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import org.koin.compose.koinInject
 import paige.navic.di.LocalNavStack
@@ -75,7 +73,6 @@ fun NowPlayingArtworkPager(
 	HorizontalPager(
 		modifier = modifier,
 		state = pagerState,
-		contentPadding = PaddingValues(horizontal = if (isLandscape) 0.dp else 8.dp),
 		userScrollEnabled = preferenceManager.swipeToSkip,
 		overscrollEffect = null
 	) { page ->

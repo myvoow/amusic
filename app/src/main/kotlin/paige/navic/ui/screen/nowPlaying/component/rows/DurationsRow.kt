@@ -46,12 +46,16 @@ fun NowPlayingDurationsRow() {
 			}
 
 			duration != null -> {
+				val elapsed = (duration.inWholeSeconds * playerState.progress).toDouble().seconds
 				Text(
-					text = ((duration.inWholeSeconds * playerState.progress).toDouble().seconds).toHoursMinutesSeconds(),
+					text = elapsed.toHoursMinutesSeconds(),
 					color = color, style = style
 				)
 				Spacer(Modifier.weight(1f))
-				Text(duration.toHoursMinutesSeconds(), color = color, style = style)
+				Text(
+					"-" + (duration - elapsed).coerceAtLeast(kotlin.time.Duration.ZERO).toHoursMinutesSeconds(),
+					color = color, style = style
+				)
 			}
 
 			else -> {

@@ -94,7 +94,7 @@ class PreferenceManager(
 
 	var nowPlayingToolbarPosition by preference(ToolbarPosition.Bottom)
 	var nowPlayingSongInfo by preference(true)
-	var nowPlayingSliderStyle by preference(NowPlayingSliderStyle.Squiggly)
+	var nowPlayingSliderStyle by preference(NowPlayingSliderStyle.Slim)
 	var nowPlayingCoverArtAction by preference(CoverArtTapAction.ShowLyrics)
 	var customHeaders by preference("")
 	var checkForUpdates by preference(true)
