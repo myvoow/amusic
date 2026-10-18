@@ -175,6 +175,7 @@ fun ArtistDetailScreen(
 					artistState = artistState,
 					starred = starred,
 					onSetStarred = { viewModel.starArtist(it) },
+					backdrop = backdrop
 				)
 			},
 			bottomBar = {

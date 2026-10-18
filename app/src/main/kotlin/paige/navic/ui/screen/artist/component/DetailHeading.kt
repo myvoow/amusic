@@ -61,7 +61,7 @@ fun ArtistDetailScreenHeading(
 		Box(
 			modifier = Modifier
 				.fillMaxWidth()
-				.height((400.dp / (maxWidth / 300.dp)) + innerPadding.calculateTopPadding())
+				.height(maxWidth.coerceAtMost(480.dp) + innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surfaceContainer)
 		) {
 			CoverArt(
@@ -85,11 +85,13 @@ fun ArtistDetailScreenHeading(
 
 			Column(
 				modifier = Modifier
-					.align(Alignment.BottomStart)
+					.align(Alignment.BottomCenter)
+					.fillMaxWidth()
 					.padding(horizontal = 20.dp)
 					.padding(start = innerPadding.calculateStartPadding(layoutDirection))
 					.padding(end = innerPadding.calculateEndPadding(layoutDirection)),
-				verticalArrangement = Arrangement.spacedBy(8.dp)
+				verticalArrangement = Arrangement.spacedBy(8.dp),
+				horizontalAlignment = Alignment.CenterHorizontally
 			) {
 				subtitle?.let { subtitle ->
 					Text(
@@ -113,7 +115,6 @@ fun ArtistDetailScreenHeading(
 						fontWeight = FontWeight.Bold,
 					),
 					modifier = Modifier
-						.fillMaxWidth()
 						.alpha(progress)
 						.scale(progress)
 				)

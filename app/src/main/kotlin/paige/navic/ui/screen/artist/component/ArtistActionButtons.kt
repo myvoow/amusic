@@ -13,14 +13,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,9 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kyant.capsule.ContinuousCapsule
 import paige.navic.R
 import paige.navic.data.database.entity.DownloadStatus
@@ -42,7 +39,6 @@ import paige.navic.ui.icons.outlined.Delete
 import paige.navic.ui.icons.outlined.Download
 import paige.navic.ui.icons.outlined.DownloadOff
 import paige.navic.ui.icons.outlined.Shuffle
-import paige.navic.ui.theme.defaultFont
 
 @Composable
 fun ArtistActionButtons(
@@ -59,11 +55,11 @@ fun ArtistActionButtons(
 		modifier = modifier
 			.fillMaxWidth()
 			.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
-		horizontalArrangement = Arrangement.spacedBy(12.dp),
+		horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
 		verticalAlignment = Alignment.CenterVertically
 	) {
-		OutlinedButton(
-			modifier = Modifier.size(width = 52.dp, height = 44.dp),
+		FilledTonalButton(
+			modifier = Modifier.size(48.dp),
 			onClick = onPlayShuffled,
 			shape = ContinuousCapsule,
 			enabled = playEnabled,
@@ -78,9 +74,8 @@ fun ArtistActionButtons(
 
 		Box(
 			modifier = Modifier
-				.weight(1f)
-				.height(56.dp)
-				.clip(ContinuousCapsule)
+				.size(64.dp)
+				.clip(CircleShape)
 				.background(
 					if (playEnabled) MaterialTheme.colorScheme.primary
 					else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
@@ -97,23 +92,15 @@ fun ArtistActionButtons(
 			) {
 				Icon(
 					Icons.Filled.Play,
-					contentDescription = null,
+					contentDescription = stringResource(R.string.action_play),
 					tint = MaterialTheme.colorScheme.onPrimary,
-					modifier = Modifier.size(25.dp)
-				)
-				Text(
-					stringResource(R.string.action_play),
-					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onPrimary,
-					fontWeight = FontWeight.SemiBold,
-					fontSize = 16.sp,
-					fontFamily = defaultFont(round = 100f)
+					modifier = Modifier.size(32.dp)
 				)
 			}
 		}
 
-		OutlinedButton(
-			modifier = Modifier.size(width = 52.dp, height = 44.dp),
+		FilledTonalButton(
+			modifier = Modifier.size(48.dp),
 			onClick = {
 				when (downloadStatus) {
 					DownloadStatus.NOT_DOWNLOADED, DownloadStatus.FAILED -> onDownload()

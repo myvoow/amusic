@@ -23,14 +23,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import com.kyant.backdrop.Backdrop
 import kotlinx.collections.immutable.toPersistentList
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.MoreVert
+import paige.navic.ui.icons.outlined.MoreHoriz
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.component.layout.NestedTopBar
+import paige.navic.ui.component.layout.NestedTopBarButtonDefaults
+import paige.navic.ui.component.layout.NestedTopBarDefaults
+import paige.navic.ui.component.layout.glass
 import paige.navic.ui.component.layout.TopBarButton
 import paige.navic.ui.component.sheet.ArtistSheet
 import paige.navic.ui.core.UiState
@@ -43,6 +49,7 @@ fun ArtistDetailScreenTopBar(
 	artistState: UiState<ArtistState>,
 	starred: Boolean? = null,
 	onSetStarred: ((Boolean) -> Unit)? = null,
+	backdrop: Backdrop? = null
 ) {
 	val state = (artistState as? UiState.Success)?.data
 	val alpha by animateFloatAsState(
@@ -53,11 +60,20 @@ fun ArtistDetailScreenTopBar(
 
 	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
 
+	// iOS: round glass buttons over the photo
+	val glassColors = NestedTopBarButtonDefaults.colors(
+		containerColor = Color.Transparent,
+		contentColor = MaterialTheme.colorScheme.onSurface
+	)
+
 	if (state != null) {
 		NestedTopBar(
 			colors = TopAppBarDefaults.topAppBarColors(
 				containerColor = MaterialTheme.colorScheme.surface.copy(alpha = alpha)
 			),
+			navigationAction = {
+				NestedTopBarDefaults.NavigationAction(glassColors, Modifier.glass(backdrop))
+			},
 			title = {
 				AnimatedVisibility(
 					scrolled,
@@ -70,9 +86,13 @@ fun ArtistDetailScreenTopBar(
 			actions = {
 				Box {
 					var expanded by remember { mutableStateOf(false) }
-					TopBarButton(onClick = { expanded = true }) {
+					TopBarButton(
+						modifier = Modifier.glass(backdrop),
+						colors = glassColors,
+						onClick = { expanded = true }
+					) {
 						Icon(
-							imageVector = Icons.Outlined.MoreVert,
+							imageVector = Icons.Outlined.MoreHoriz,
 							contentDescription = stringResource(R.string.action_more)
 						)
 					}
