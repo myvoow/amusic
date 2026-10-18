@@ -1,0 +1,24 @@
+# Navic AutoMix: analyses the library in the background and serves automix.json on the LAN only.
+services:
+  analyzer:
+    build: .
+    container_name: automix-analyzer
+    user: 1000:1000
+    restart: unless-stopped
+    cpus: 2
+    # incremental: only new or changed tracks are analysed, every 6 h
+    command: sh -c "while true; do nice -n 10 python /app/analyze.py; sleep 21600; done"
+    volumes:
+      - /ssdcaca/shared/Musique:/music:ro
+      - /home/myvo/navidrome/data:/nd:ro
+      - ./out:/out
+  web:
+    image: caddy:2-alpine
+    container_name: automix-web
+    restart: unless-stopped
+    # static, read-only, ETag on by default; LAN address only, not behind the Cloudflare tunnel
+    command: caddy file-server --root /srv --listen :80
+    ports:
+      - 192.168.1.134:4534:80
+    volumes:
+      - ./out:/srv:ro
