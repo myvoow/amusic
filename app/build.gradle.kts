@@ -240,5 +240,6 @@ dependencies {
 	implementation(libs.subsonicKotlin)
 	implementation(libs.antisocialcord)
 	ksp(libs.androidx.room3.compiler)
+	testImplementation(libs.junit)
 	coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
