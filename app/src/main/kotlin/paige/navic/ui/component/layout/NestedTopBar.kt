@@ -39,11 +39,12 @@ import paige.navic.ui.icons.outlined.ArrowBack
 object NestedTopBarDefaults {
 	@Composable
 	fun NavigationAction(
-		colors: NestedTopBarButtonColors = NestedTopBarButtonDefaults.colors()
+		colors: NestedTopBarButtonColors = NestedTopBarButtonDefaults.colors(),
+		modifier: Modifier = Modifier
 	) {
 		val backStack = LocalNavStack.current
 		TopBarButton(
-			modifier = Modifier.padding(start = 20.dp, end = 13.dp),
+			modifier = Modifier.padding(start = 20.dp, end = 13.dp).then(modifier),
 			onClick = dropUnlessResumed {
 				if (backStack.size > 1) {
 					backStack.removeLastOrNull()

@@ -13,12 +13,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -70,9 +71,9 @@ fun CollectionDetailScreenHeadingRowButtons(
 		)
 	) {
 		val buttonShape = ContinuousCapsule
-		val buttonHeight = 44.dp
-		OutlinedButton(
-			modifier = Modifier.size(width = 52.dp, height = buttonHeight),
+		val buttonHeight = 48.dp
+		FilledTonalButton(
+			modifier = Modifier.size(buttonHeight),
 			onClick = {
 				player.shufflePlay(collection)
 			},
@@ -87,7 +88,7 @@ fun CollectionDetailScreenHeadingRowButtons(
 			)
 		}
 		Button(
-			modifier = Modifier.weight(1f).height(buttonHeight),
+			modifier = Modifier.width(160.dp).height(buttonHeight),
 			onClick = {
 				player.playNow(collection)
 			},
@@ -110,8 +111,8 @@ fun CollectionDetailScreenHeadingRowButtons(
 				fontFamily = defaultFont(round = 100f)
 			)
 		}
-		OutlinedButton(
-			modifier = Modifier.size(width = 52.dp, height = buttonHeight),
+		FilledTonalButton(
+			modifier = Modifier.size(buttonHeight),
 			onClick = {
 				scope.launch {
 					when (downloadStatus) {

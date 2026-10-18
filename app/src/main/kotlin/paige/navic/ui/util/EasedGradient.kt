@@ -8,9 +8,14 @@ package paige.navic.ui.util
 
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.Easing
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 
 fun Brush.Companion.easedGradient(
 	easing: Easing = EaseInCirc,
@@ -40,3 +45,14 @@ fun Brush.Companion.easedVerticalGradient(
 	end = Offset(x = 0f, y = endY),
 	color = color
 )
+
+/** Fades the bottom of the content to transparent (iOS artwork melting into the background). */
+fun Modifier.fadeOutBottom(): Modifier = this
+	.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+	.drawWithContent {
+		drawContent()
+		drawRect(
+			Brush.easedVerticalGradient(startY = 0f, endY = size.height),
+			blendMode = BlendMode.DstIn
+		)
+	}

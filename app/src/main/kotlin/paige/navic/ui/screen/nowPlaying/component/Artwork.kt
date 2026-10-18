@@ -20,12 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
@@ -34,7 +29,7 @@ import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.Note
-import paige.navic.ui.util.easedVerticalGradient
+import paige.navic.ui.util.fadeOutBottom
 
 @Composable
 fun NowPlayingArtwork(
@@ -71,14 +66,7 @@ fun NowPlayingArtwork(
 				coverArtId = song.coverArtId,
 				modifier = Modifier
 					.fillMaxSize()
-					.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-					.drawWithContent {
-						drawContent()
-						drawRect(
-							Brush.easedVerticalGradient(startY = 0f, endY = size.height),
-							blendMode = BlendMode.DstIn
-						)
-					},
+					.fadeOutBottom(),
 				contentScale = ContentScale.Crop,
 				shape = RectangleShape,
 				onClick = onClick

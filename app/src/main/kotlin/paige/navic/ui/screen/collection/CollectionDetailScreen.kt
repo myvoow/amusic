@@ -158,7 +158,8 @@ fun CollectionDetailScreen(
 					onSetStarred = if (collection !is DomainPlaylist) {
 						{ viewModel.starAlbum(it) }
 					} else null,
-					refreshCollection = { viewModel.refreshCollection(false) }
+					refreshCollection = { viewModel.refreshCollection(false) },
+					backdrop = backdrop
 				)
 			},
 			bottomBar = {
@@ -174,7 +175,6 @@ fun CollectionDetailScreen(
 			PullToRefreshBox(
 				modifier = Modifier
 					.layerBackdrop(backdrop)
-					.padding(top = contentPadding.calculateTopPadding())
 					.background(MaterialTheme.colorScheme.surface),
 				finished = collectionState !is UiState.Loading,
 				onRefresh = { viewModel.refreshCollection(true) },

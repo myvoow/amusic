@@ -12,14 +12,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -34,6 +36,7 @@ import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.theme.defaultFont
 import paige.navic.ui.util.EmphasizedDecelerateEasing
+import paige.navic.ui.util.fadeOutBottom
 
 @Composable
 fun CollectionDetailScreenHeadingRow(
@@ -48,9 +51,9 @@ fun CollectionDetailScreenHeadingRow(
 			coverArtId = collection.coverArtId,
 			contentDescription = collection.name,
 			modifier = Modifier
-				.widthIn(0.dp, 420.dp)
-				.padding(horizontal = 64.dp)
+				.fillMaxWidth()
 				.aspectRatio(1f)
+				.fadeOutBottom()
 				.sharedElement(
 					sharedContentState = this@with.rememberSharedContentState(sharedTransitionKey),
 					boundsTransform = BoundsTransform { _, _ ->
@@ -63,6 +66,7 @@ fun CollectionDetailScreenHeadingRow(
 				)
 				.alpha(titleAlpha),
 			crossfadeMs = 0,
+			shape = RectangleShape,
 			onClick = collection.coverArtId?.let { coverArtId ->
 				dropUnlessResumed {
 					backStack.add(Screen.ImageView(
@@ -82,7 +86,7 @@ fun CollectionDetailScreenHeadingRow(
 		) {
 			Text(
 				text = collection.name ?: "[unknown album]",
-				style = MaterialTheme.typography.headlineSmall,
+				style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
 				textAlign = TextAlign.Center,
 				modifier = Modifier
 			)

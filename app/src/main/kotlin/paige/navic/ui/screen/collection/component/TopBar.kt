@@ -8,7 +8,9 @@ package paige.navic.ui.screen.collection.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,9 +18,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.dropUnlessResumed
+import com.kyant.backdrop.Backdrop
 import kotlinx.collections.immutable.toPersistentList
 import paige.navic.R
 import paige.navic.data.database.entity.DownloadStatus
@@ -27,8 +31,11 @@ import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumInfo
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.MoreVert
+import paige.navic.ui.icons.outlined.MoreHoriz
 import paige.navic.ui.component.layout.NestedTopBar
+import paige.navic.ui.component.layout.NestedTopBarButtonDefaults
+import paige.navic.ui.component.layout.NestedTopBarDefaults
+import paige.navic.ui.component.layout.glass
 import paige.navic.ui.component.layout.TopBarButton
 import paige.navic.ui.component.sheet.CollectionSheet
 import paige.navic.ui.core.UiState
@@ -50,12 +57,24 @@ fun CollectionDetailScreenTopBar(
 	onSetRating: ((Int) -> Unit)?,
 	starred: Boolean?,
 	onSetStarred: ((Boolean) -> Unit)? = null,
-	refreshCollection: () -> Unit
+	refreshCollection: () -> Unit,
+	backdrop: Backdrop
 ) {
 	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
 	val backStack = LocalNavStack.current
+	// iOS: round glass buttons floating over the artwork, header fills in on scroll
+	val glassColors = NestedTopBarButtonDefaults.colors(
+		containerColor = Color.Transparent,
+		contentColor = MaterialTheme.colorScheme.onSurface
+	)
 
 	NestedTopBar(
+		colors = TopAppBarDefaults.topAppBarColors(
+			containerColor = MaterialTheme.colorScheme.surface.copy(alpha = titleAlpha)
+		),
+		navigationAction = {
+			NestedTopBarDefaults.NavigationAction(glassColors, Modifier.glass(backdrop))
+		},
 		title = {
 			Text(
 				text = collection?.name.orEmpty(),
@@ -67,12 +86,15 @@ fun CollectionDetailScreenTopBar(
 		actions = {
 			Box {
 				var expanded by rememberSaveable { mutableStateOf(false) }
-				TopBarButton(onClick = {
+				TopBarButton(
+					modifier = Modifier.glass(backdrop),
+					colors = glassColors,
+					onClick = {
 					expanded = true
 					refreshCollection()
 				}) {
 					Icon(
-						Icons.Outlined.MoreVert,
+						Icons.Outlined.MoreHoriz,
 						stringResource(R.string.action_more)
 					)
 				}
