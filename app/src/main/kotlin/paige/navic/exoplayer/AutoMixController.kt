@@ -110,7 +110,7 @@ class AutoMixController(
 		val plan = currentPlan()
 		if (plan == TransitionPlan.None) return cancel(null)
 		val posA = main.currentPosition / 1000.0
-		if (phase == Phase.Idle && posA >= plan.startOffsetInA - PREPARE_AHEAD_SECONDS) prepare(plan)
+		if (phase == Phase.Idle && posA >= plan.startOffsetInA - preferenceManager.autoMixTuning.prepareAheadSeconds) prepare(plan)
 		if (phase == Phase.Prepared && posA >= plan.startOffsetInA) {
 			val m = mix ?: return
 			if (m.playbackState != Player.STATE_READY) {
@@ -120,7 +120,7 @@ class AutoMixController(
 			m.playWhenReady = main.playWhenReady
 			phase = Phase.Overlap
 			lastReport = -1
-			AutoMixState.isMixing.value = plan is TransitionPlan.Mix
+			AutoMixState.isMixing.value = plan is TransitionPlan.Mix && preferenceManager.autoMixTuning.showMixingLabel
 			if (debug) Log.d(TAG, "start $plan at A=${main.currentPosition} ms")
 		}
 	}
@@ -130,7 +130,8 @@ class AutoMixController(
 		val a = main.currentMediaItem
 		val b = if (next != C.INDEX_UNSET) main.getMediaItemAt(next) else null
 		val mode = preferenceManager.trackTransition
-		val key = "$mode|${AutoMixState.tracks.value.size}|${main.currentMediaItemIndex}:${a?.mediaId}>$next:${b?.mediaId}"
+		val tuning = preferenceManager.autoMixTuning
+		val key = "$mode|${tuning.hashCode()}|${AutoMixState.tracks.value.size}|${main.currentMediaItemIndex}:${a?.mediaId}>$next:${b?.mediaId}"
 		if (key != planKey) {
 			cancel("queue changed")
 			planKey = key
@@ -140,7 +141,7 @@ class AutoMixController(
 			else planTransition(
 				a.mixTrack(main.duration.takeIf { it > 0 } ?: a.mediaMetadata.durationMs),
 				b.mixTrack(b.mediaMetadata.durationMs),
-				MixContext(mode, repeatOne = main.repeatMode == Player.REPEAT_MODE_ONE)
+				MixContext(mode, repeatOne = main.repeatMode == Player.REPEAT_MODE_ONE, tuning = tuning)
 			)
 		}
 		return if (key == doneKey) TransitionPlan.None else plan
@@ -173,9 +174,14 @@ class AutoMixController(
 		}
 		val posA = main.currentPosition / 1000.0
 		val t = if (plan.overlapSeconds > 0) ((posA - plan.startOffsetInA) / plan.overlapSeconds).coerceIn(0.0, 1.0) else 1.0
-		// equal power: the two songs keep a steady loudness, A fades out while B fades in
-		main.volume = cos(t * PI / 2).toFloat()
-		m.volume = sin(t * PI / 2).toFloat()
+		// equal power keeps a steady loudness through the overlap; linear dips in the middle
+		if (preferenceManager.autoMixTuning.equalPowerFade) {
+			main.volume = cos(t * PI / 2).toFloat()
+			m.volume = sin(t * PI / 2).toFloat()
+		} else {
+			main.volume = (1 - t).toFloat()
+			m.volume = t.toFloat()
+		}
 		if (plan is TransitionPlan.Mix) {
 			val expectedB = plan.startOffsetInB + (posA - plan.startOffsetInA) * plan.stretchRatio
 			val err = follow(m, expectedB, plan.stretchRatio.toFloat(), AUDIBLE_GAIN, AUDIBLE_MAX_NUDGE)
@@ -214,7 +220,8 @@ class AutoMixController(
 		val m = mix ?: return cancel("mix player gone")
 		val elapsed = SystemClock.elapsedRealtime() - phaseStart
 		// back to B's own tempo over a few bars once A is gone, no audible tempo jump
-		val r = (elapsed / (RAMP_SECONDS * 1000)).coerceIn(0.0, 1.0)
+		val rampMs = preferenceManager.autoMixTuning.rampSeconds * 1000.0
+		val r = if (rampMs > 0) (elapsed / rampMs).coerceIn(0.0, 1.0) else 1.0
 		val speed = (plan.stretchRatio + (1 - plan.stretchRatio) * r).toFloat()
 		if (abs(m.playbackParameters.speed - speed) > 0.001f) m.playbackParameters = PlaybackParameters(speed, 1f)
 		var err = Double.NaN
@@ -222,7 +229,7 @@ class AutoMixController(
 			err = follow(main, m.currentPosition / 1000.0, speed, MUTED_GAIN, MUTED_MAX_NUDGE)
 			synced = if (r >= 1 && abs(err) < SYNC_TOLERANCE_MS) synced + 1 else 0
 		}
-		val timedOut = elapsed > (RAMP_SECONDS * 1000 + HANDOFF_TIMEOUT_MS)
+		val timedOut = elapsed > rampMs + HANDOFF_TIMEOUT_MS
 		if (synced >= 3 || timedOut) {
 			if (debug) Log.d(TAG, "handoff ${if (timedOut) "TIMED OUT" else "ok"}: main=${main.currentPosition} ms, " +
 				"mix=${m.currentPosition} ms, error ${err.toInt()} ms")
@@ -274,8 +281,6 @@ class AutoMixController(
 		const val EXTRA_REPLAY_GAIN = "navic.replayGain"
 
 		// starting values, tune by ear
-		private const val PREPARE_AHEAD_SECONDS = 30.0
-		private const val RAMP_SECONDS = 8.0 // B's speed back to 1.0 after A is gone, about 4 bars
 		private const val HANDOFF_LEAD_MS = 600L
 		private const val SYNC_TOLERANCE_MS = 15.0
 		private const val BEAT_ERROR_WARN_MS = 30.0

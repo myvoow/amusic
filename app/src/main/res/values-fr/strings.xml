@@ -508,4 +508,31 @@
     <string name="option_track_transition_none">Aucune</string>
     <string name="option_automix_url">Adresse des données AutoMix</string>
     <string name="subtitle_automix_url">automix.json sur votre serveur, vide = AutoMix désactivé</string>
+    <string name="title_automix_tempo">AutoMix : tempo et tonalité</string>
+    <string name="title_automix_overlap">AutoMix : recouvrement</string>
+    <string name="title_automix_other">AutoMix : exclusions et affichage</string>
+    <string name="option_crossfade_seconds">Durée du fondu enchaîné</string>
+    <string name="option_automix_max_tempo_gap">Écart de tempo maximal</string>
+    <string name="subtitle_automix_max_tempo_gap">Au-delà, un fondu court au lieu d\'un mix calé sur les temps</string>
+    <string name="option_automix_min_confidence">Confiance minimale du tempo</string>
+    <string name="option_automix_require_steady">Tempo régulier uniquement</string>
+    <string name="option_automix_use_keys">Tenir compte des tonalités</string>
+    <string name="subtitle_automix_use_keys">Recouvrement plus court si les tonalités jurent</string>
+    <string name="option_automix_compatible_bars">Mesures si tonalités compatibles</string>
+    <string name="option_automix_distant_bars">Mesures si tonalités éloignées</string>
+    <string name="option_automix_min_overlap">Recouvrement minimal</string>
+    <string name="option_automix_max_overlap">Recouvrement maximal</string>
+    <string name="option_automix_exit_early">Sortir plus tôt (mesures)</string>
+    <string name="subtitle_automix_exit_early">Retirées à la fin du morceau en cours</string>
+    <string name="option_automix_ramp">Retour au tempo d\'origine</string>
+    <string name="option_automix_short_fade">Fondu si les tempos diffèrent</string>
+    <string name="option_automix_equal_power">Fondu à puissance égale</string>
+    <string name="subtitle_automix_equal_power">Désactivé : fondu linéaire, plus faible au milieu</string>
+    <string name="option_automix_prepare">Préparer le morceau suivant</string>
+    <string name="option_automix_albums">Mixer les albums lus dans l\'ordre</string>
+    <string name="option_automix_exclude_live">Ne pas mixer le live</string>
+    <string name="option_automix_exclusions">Genres jamais mixés</string>
+    <string name="subtitle_automix_exclusions">Séparés par des virgules, valent aussi pour les titres d\'album</string>
+    <string name="option_automix_show_mixing">Afficher « Mixing »</string>
+    <string name="action_automix_reset">Rétablir les réglages AutoMix</string>
 </resources>

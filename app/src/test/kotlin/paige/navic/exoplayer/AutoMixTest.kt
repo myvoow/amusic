@@ -62,7 +62,7 @@ class AutoMixTest {
 
 	@Test
 	fun incompatibleTemposFadeShortly() {
-		assertEquals(ShortFade(SHORT_FADE_SECONDS, 209.0, 0.5), planTransition(track(128.0), track(95.0), auto))
+		assertEquals(ShortFade(1.0, 209.0, 0.5), planTransition(track(128.0), track(95.0), auto))
 	}
 
 	@Test
@@ -100,7 +100,7 @@ class AutoMixTest {
 	@Test
 	fun crossfadeWorksWithoutData() {
 		assertEquals(
-			ShortFade(CROSSFADE_SECONDS, 212.0 - CROSSFADE_SECONDS, 0.0),
+			ShortFade(6.0, 206.0, 0.0),
 			planTransition(track(analysed = false), track(analysed = false), MixContext(TrackTransition.Crossfade))
 		)
 	}
@@ -109,6 +109,21 @@ class AutoMixTest {
 	fun slowTempoOverlapStaysUnder16Seconds() {
 		val plan = planTransition(track(80.0), track(80.0), auto) as Mix
 		assertEquals(5 * 3.0, plan.overlapSeconds, 1e-9) // 8 bars would be 24 s
+	}
+
+	@Test
+	fun userTuning() {
+		fun with(t: AutoMixTuning) = MixContext(TrackTransition.AutoMix, tuning = t)
+		val inOrder = track(album = "x", trackNumber = 3) to track(album = "x", trackNumber = 4)
+		assertTrue(planTransition(inOrder.first, inOrder.second, with(AutoMixTuning(mixAlbumsInOrder = true))) is Mix)
+		assertTrue(planTransition(track(), track(albumTitle = "Live"), with(AutoMixTuning(excludeLive = false))) is Mix)
+		assertTrue(planTransition(track(), track(genre = "Techno"), with(AutoMixTuning(exclusions = "techno"))) is CleanCut)
+		assertTrue(planTransition(track(128.0), track(95.0), with(AutoMixTuning(maxTempoGapPercent = 30f))) is Mix)
+		assertEquals(ShortFade(2.0, 208.0, 0.5), planTransition(track(128.0), track(95.0), with(AutoMixTuning(shortFadeSeconds = 2f))))
+		val normal = planTransition(track(), track(), auto) as Mix
+		val early = planTransition(track(), track(), with(AutoMixTuning(exitEarlyBars = 8))) as Mix
+		assertEquals(8 * 4 * 60 / 128.0, normal.startOffsetInA - early.startOffsetInA, 1e-9)
+		assertEquals(4 * 4 * 60 / 128.0, (planTransition(track(), track(), with(AutoMixTuning(compatibleKeyBars = 4))) as Mix).overlapSeconds, 1e-9)
 	}
 
 	@Test

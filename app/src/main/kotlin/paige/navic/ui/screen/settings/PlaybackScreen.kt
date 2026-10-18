@@ -26,6 +26,8 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.exoplayer.AutoMixState
+import androidx.compose.material3.MaterialTheme
+import paige.navic.exoplayer.AutoMixTuning
 import paige.navic.exoplayer.TrackTransition
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -135,6 +137,8 @@ fun SettingsPlaybackScreen() {
 					)
 				}
 
+				AutoMixSettings(preferenceManager)
+
 				SettingsGroup(title = { Text(stringResource(R.string.title_behaviour)) }) {
 					val enableDiscordIntegration = preferenceManager.enableDiscordIntegration
 					val enableScrobbling = preferenceManager.enableScrobbling
@@ -227,3 +231,122 @@ val TrackTransition.label
 		TrackTransition.Crossfade -> R.string.option_track_transition_crossfade
 		TrackTransition.None -> R.string.option_track_transition_none
 	}
+
+/** AutoMix and crossfade tuning, shown for the chosen transition mode only. */
+@Composable
+private fun AutoMixSettings(preferenceManager: PreferenceManager) {
+	val mode = preferenceManager.trackTransition
+	val t = preferenceManager.autoMixTuning
+	val set = { new: AutoMixTuning -> preferenceManager.autoMixTuning = new }
+	val seconds = { v: Float -> "%.1f s".format(v) }
+	val whole = { v: Float -> v.roundToInt().toString() }
+	when (mode) {
+		TrackTransition.None -> Unit
+		TrackTransition.Crossfade -> SettingsGroup {
+			TuningSlider(R.string.option_crossfade_seconds, t.crossfadeSeconds, 1f..12f, 10, seconds, 0, 1) {
+				set(t.copy(crossfadeSeconds = it))
+			}
+		}
+		TrackTransition.AutoMix -> {
+			SettingsGroup(title = { Text(stringResource(R.string.title_automix_tempo)) }) {
+				TuningSlider(R.string.option_automix_max_tempo_gap, t.maxTempoGapPercent, 2f..20f, 17, { "${it.roundToInt()} %" }, 0, 6, R.string.subtitle_automix_max_tempo_gap) {
+					set(t.copy(maxTempoGapPercent = it))
+				}
+				TuningSlider(R.string.option_automix_min_confidence, t.minBpmConfidence, 0f..1f, 19, { "${(it * 100).roundToInt()} %" }, 1, 6) {
+					set(t.copy(minBpmConfidence = it))
+				}
+				TuningToggle(R.string.option_automix_require_steady, t.requireSteadyTempo, 2, 6) { set(t.copy(requireSteadyTempo = it)) }
+				TuningToggle(R.string.option_automix_use_keys, t.useKeys, 3, 6, R.string.subtitle_automix_use_keys) { set(t.copy(useKeys = it)) }
+				TuningSlider(R.string.option_automix_compatible_bars, t.compatibleKeyBars.toFloat(), 1f..16f, 14, whole, 4, 6) {
+					set(t.copy(compatibleKeyBars = it.roundToInt()))
+				}
+				TuningSlider(R.string.option_automix_distant_bars, t.distantKeyBars.toFloat(), 1f..16f, 14, whole, 5, 6) {
+					set(t.copy(distantKeyBars = it.roundToInt()))
+				}
+			}
+			SettingsGroup(title = { Text(stringResource(R.string.title_automix_overlap)) }) {
+				TuningSlider(R.string.option_automix_min_overlap, t.minOverlapSeconds, 2f..16f, 13, seconds, 0, 7) {
+					set(t.copy(minOverlapSeconds = it))
+				}
+				TuningSlider(R.string.option_automix_max_overlap, t.maxOverlapSeconds, 6f..32f, 25, seconds, 1, 7) {
+					set(t.copy(maxOverlapSeconds = it))
+				}
+				TuningSlider(R.string.option_automix_exit_early, t.exitEarlyBars.toFloat(), 0f..32f, 7, whole, 2, 7, R.string.subtitle_automix_exit_early) {
+					set(t.copy(exitEarlyBars = it.roundToInt()))
+				}
+				TuningSlider(R.string.option_automix_ramp, t.rampSeconds, 0f..16f, 15, seconds, 3, 7) {
+					set(t.copy(rampSeconds = it))
+				}
+				TuningSlider(R.string.option_automix_short_fade, t.shortFadeSeconds, 0f..4f, 7, seconds, 4, 7) {
+					set(t.copy(shortFadeSeconds = it))
+				}
+				TuningToggle(R.string.option_automix_equal_power, t.equalPowerFade, 5, 7, R.string.subtitle_automix_equal_power) {
+					set(t.copy(equalPowerFade = it))
+				}
+				TuningSlider(R.string.option_automix_prepare, t.prepareAheadSeconds, 10f..60f, 9, seconds, 6, 7) {
+					set(t.copy(prepareAheadSeconds = it))
+				}
+			}
+			SettingsGroup(title = { Text(stringResource(R.string.title_automix_other)) }) {
+				TuningToggle(R.string.option_automix_albums, t.mixAlbumsInOrder, 0, 5) { set(t.copy(mixAlbumsInOrder = it)) }
+				TuningToggle(R.string.option_automix_exclude_live, t.excludeLive, 1, 5) { set(t.copy(excludeLive = it)) }
+				SettingsInputItem(
+					value = t.exclusions,
+					onValueChanged = { set(t.copy(exclusions = it)) },
+					defaultValue = AutoMixTuning().exclusions,
+					content = { Text(stringResource(R.string.option_automix_exclusions)) },
+					supportingContent = { Text(stringResource(R.string.subtitle_automix_exclusions)) },
+					shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 5)
+				)
+				TuningToggle(R.string.option_automix_show_mixing, t.showMixingLabel, 3, 5) { set(t.copy(showMixingLabel = it)) }
+				SettingsNavItem(
+					onClick = { set(AutoMixTuning()) },
+					content = { Text(stringResource(R.string.action_automix_reset)) },
+					shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 5)
+				)
+			}
+		}
+	}
+}
+
+@Composable
+private fun TuningSlider(
+	label: Int,
+	value: Float,
+	range: ClosedFloatingPointRange<Float>,
+	steps: Int,
+	format: (Float) -> String,
+	index: Int,
+	count: Int,
+	subtitle: Int? = null,
+	onChange: (Float) -> Unit
+) = SettingsSliderItem(
+	value = value,
+	valueRange = range,
+	steps = steps,
+	onValueChange = onChange,
+	trailingContent = { Text(format(value)) },
+	content = {
+		Column {
+			Text(stringResource(label))
+			subtitle?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall) }
+		}
+	},
+	shapes = SegmentedListItemDefaults.segmentedShapes(index = index, count = count)
+)
+
+@Composable
+private fun TuningToggle(
+	label: Int,
+	checked: Boolean,
+	index: Int,
+	count: Int,
+	subtitle: Int? = null,
+	onChange: (Boolean) -> Unit
+) = SettingsToggleItem(
+	checked = checked,
+	onCheckedChange = onChange,
+	content = { Text(stringResource(label)) },
+	supportingContent = subtitle?.let { { Text(stringResource(it)) } },
+	shapes = SegmentedListItemDefaults.segmentedShapes(index = index, count = count)
+)
