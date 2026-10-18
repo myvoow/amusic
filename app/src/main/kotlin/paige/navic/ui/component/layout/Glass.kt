@@ -48,9 +48,9 @@ fun Modifier.glass(
 		effects = {
 			vibrancy()
 			blur(8.dp.toPx())
-			// refraction height must stay below the smallest corner radius (circles >= 40dp here)
-			lens(12.dp.toPx(), 24.dp.toPx())
+			// Kyant's values (24 dp on a 64 dp bar); refraction must stay below the corner radius
+			lens(size.minDimension * 0.375f, 24.dp.toPx())
 		},
-		onDrawSurface = { drawRect(tint.copy(alpha = .6f)) }
+		onDrawSurface = { drawRect(tint.copy(alpha = .4f)) }
 	)
 }

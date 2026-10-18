@@ -6,30 +6,21 @@
 
 package paige.navic.ui.component.layout
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.kyant.backdrop.Backdrop
@@ -44,7 +35,8 @@ import paige.navic.ui.screen.settings.viewmodel.NavtabsViewModel
 import paige.navic.ui.viewmodel.RootViewModel
 
 /**
- * iOS 26 tab bar: a glass capsule of tabs and a separate glass search circle, emitted as two
+ * iOS 26 tab bar: Kyant's liquid glass tabs (draggable glass indicator) and a liquid glass
+ * search button, emitted as two
  * layout children for [RootBottomBar]. As [collapse] goes 0 -> 1 the other tabs and the labels
  * fade and shrink away until only the active tab is left, as a circle.
  */
@@ -84,33 +76,35 @@ fun BottomBar(
 
 	// the tab root stays highlighted while browsing deeper into it, like iOS
 	val root = backStack.firstOrNull()
-	val kept = tabs.firstOrNull { it.destination == root } ?: tabs.firstOrNull()
+	val selected = tabs.indexOfFirst { it.destination == root }
+	val kept = selected.takeIf { it >= 0 } ?: 0
+	val selectedState = rememberUpdatedState(selected) // a stable lambda for LiquidBottomTabs
 	val p = collapse()
 	val fade = 1f - p
 
-	Row(Modifier.glass(backdrop).padding(4.dp)) {
-		tabs.forEach { tab ->
-			if (tab != kept && p >= 1f) return@forEach
-			val selected = root == tab.destination
-			val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+	if (tabs.isEmpty()) Box(Modifier) else LiquidBottomTabs(
+		selectedTabIndex = { selectedState.value },
+		onTabSelected = { i -> tabs.getOrNull(i)?.let { if (it.destination != root) onTabSelected(it.destination) } },
+		onTabReselected = { i -> tabs.getOrNull(i)?.let { onTabSelected(it.destination) } },
+		backdrop = backdrop,
+		tabsCount = tabs.size,
+		// the glass indicator fades out while the bar collapses, the kept tab turns accent instead
+		indicatorAlpha = { if (selectedState.value < 0) 0f else 1f - collapse() }
+	) {
+		tabs.forEachIndexed { index, tab ->
+			if (index != kept && p >= 1f) return@forEachIndexed
 			val label = stringResource(tab.label)
-			Column(
+			val color = if (index == selected) lerp(MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.primary, p)
+			else MaterialTheme.colorScheme.onSurface
+			LiquidBottomTab(
+				onClick = dropUnlessResumed { onTabSelected(tab.destination) },
+				weight = if (index == kept) 1f else fade.coerceAtLeast(0.001f),
 				modifier = Modifier
-					.weight(if (tab == kept) 1f else fade.coerceAtLeast(0.001f))
-					.fillMaxHeight()
-					.graphicsLayer { alpha = if (tab == kept) 1f else fade }
-					.clip(CircleShape)
-					.background(if (selected) MaterialTheme.colorScheme.onSurface.copy(alpha = .08f) else Color.Transparent)
-					.selectable(
-						selected = selected,
-						role = Role.Tab,
-						onClick = dropUnlessResumed { onTabSelected(tab.destination) }
-					),
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Center
+					.graphicsLayer { alpha = if (index == kept) 1f else fade }
+					.semantics { this.selected = index == selected }
 			) {
 				Icon(
-					imageVector = if (selected) tab.iconFilled else tab.iconOutlined,
+					imageVector = if (index == selected) tab.iconFilled else tab.iconOutlined,
 					contentDescription = if (p > .5f) label else null,
 					tint = color
 				)
@@ -131,9 +125,9 @@ fun BottomBar(
 			}
 		}
 	}
-	IconButton(
+	LiquidButton(
 		onClick = dropUnlessResumed { onTabSelected(NavigationTab.SEARCH.destination) },
-		modifier = Modifier.glass(backdrop)
+		backdrop = backdrop
 	) {
 		Icon(
 			imageVector = NavigationTab.SEARCH.iconOutlined,

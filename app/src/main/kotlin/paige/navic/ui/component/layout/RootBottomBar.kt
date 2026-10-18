@@ -66,7 +66,7 @@ fun RootBottomBar(
 		val (mini, tabs, search) = measurables
 		val p = progress // read while measuring: the morph only relayouts, it doesn't recompose
 		val width = constraints.maxWidth
-		val bar = 62.dp.roundToPx()
+		val bar = 64.dp.roundToPx()
 		val gap = 8.dp.roundToPx()
 		val miniPlaceable = mini.measure(Constraints.fixedWidth(lerp(width, width - 2 * (bar + gap), p)))
 		val tabsPlaceable = tabs.measure(Constraints.fixed(lerp(width - bar - gap, bar, p), bar))
