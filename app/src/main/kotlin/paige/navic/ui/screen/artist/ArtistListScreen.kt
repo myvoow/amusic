@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.artist
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
@@ -106,6 +108,7 @@ fun ArtistListScreen(
 		}
 	}
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = {
 			if (!nested) {
@@ -125,12 +128,13 @@ fun ArtistListScreen(
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
 				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = artistsState !is UiState.Loading,

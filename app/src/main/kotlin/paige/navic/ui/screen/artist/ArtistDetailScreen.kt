@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.artist
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -165,6 +167,7 @@ fun ArtistDetailScreen(
 	}
 
 	NavicTheme(colorScheme) {
+		val backdrop = rememberLayerBackdrop()
 		Scaffold(
 			topBar = {
 				ArtistDetailScreenTopBar(
@@ -180,7 +183,7 @@ fun ArtistDetailScreen(
 				val preferVisible =
 					preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 				if (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible) {
-					RootBottomBar(scrolled = scrollManager.isTriggered)
+					RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 				}
 			}
 		) { contentPadding ->
@@ -198,7 +201,7 @@ fun ArtistDetailScreen(
 						animationSpec = spatialSpec
 					))
 				},
-				modifier = Modifier.fillMaxSize()
+				modifier = Modifier.layerBackdrop(backdrop).fillMaxSize()
 			) { artistState ->
 				when (artistState) {
 					is UiState.Error -> Box(Modifier.fillMaxSize().padding(contentPadding)) {

@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.starred
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -109,6 +111,7 @@ fun StarredScreen() {
 
 	val isOnline by songsViewModel.isOnline.collectAsStateWithLifecycle()
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(R.string.title_starred)) }) },
 		bottomBar = {
@@ -117,7 +120,7 @@ fun StarredScreen() {
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { innerPadding ->
@@ -126,6 +129,7 @@ fun StarredScreen() {
 			songsState is UiState.Loading
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = !isAnythingLoading,

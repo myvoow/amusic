@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.share
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -66,17 +68,19 @@ fun ShareListScreen() {
 
 	var deletionId by remember { mutableStateOf<String?>(null) }
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(R.string.title_shares)) }) },
 		bottomBar = {
 			val scrollManager = LocalBottomBarScrollManager.current
 			if (preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { contentPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = contentPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = sharesState !is UiState.Loading && !isRefreshingFlow,

@@ -106,10 +106,10 @@ class PreferenceManager(
 	var bottomBarCollapseMode by preference(BottomBarCollapseMode.OnScroll)
 	var bottomBarVisibilityMode by preference(BottomBarVisibilityMode.AllScreens)
 	var miniPlayerStyle by preference(MiniPlayerStyle.Detached)
-	var miniPlayerProgressStyle by preference(MiniPlayerProgressStyle.Seekable)
+	var miniPlayerProgressStyle by preference(MiniPlayerProgressStyle.Hidden)
 
 	// theme related settings
-	var theme by preference(Theme.Dynamic)
+	var theme by preference(Theme.AppleMusic)
 	var themeMode by preference(ThemeMode.System)
 	var amoled by preference(false)
 	var dynamicTheming by preference(false)

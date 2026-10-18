@@ -75,6 +75,7 @@ coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
 
 # Compose 3rd party
 capsule = { module = "top.ltfan.capsule:capsule", version = "1.2.0" }
+backdrop = { module = "io.github.kyant0:backdrop", version = "2.0.1" }
 kmpalette-core = { module = "com.kmpalette:kmpalette-core", version.ref = "kmpalette" }
 kmpalette-network = { module = "com.kmpalette:extensions-network", version.ref = "kmpalette" }
 materialKolor = { module = "com.materialkolor:material-kolor", version = "5.0.1" }

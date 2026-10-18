@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.stats
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -88,6 +90,7 @@ fun StatisticsScreen(
 	var selectedArtist by remember { mutableStateOf<DomainArtist?>(null) }
 
 	NavicTheme {
+		val backdrop = rememberLayerBackdrop()
 		Scaffold(
 			topBar = {
 				if (!nested) {
@@ -106,7 +109,7 @@ fun StatisticsScreen(
 					preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 				if (!nested
 					|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
-					RootBottomBar(scrolled = scrollManager.isTriggered)
+					RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 				}
 			}
 		) { contentPadding ->
@@ -118,6 +121,7 @@ fun StatisticsScreen(
 				LazyVerticalGrid(
 					modifier = Modifier
 						.fillMaxSize()
+						.layerBackdrop(backdrop)
 						.let {
 							if (!nested) it.nestedScroll(scrollBehavior.nestedScrollConnection) else it
 						},

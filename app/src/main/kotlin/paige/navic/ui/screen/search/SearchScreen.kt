@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.search
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -160,6 +162,7 @@ fun SearchScreen(
 		}
 	}
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = {
 			Column(
@@ -189,13 +192,13 @@ fun SearchScreen(
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
 				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { contentPadding ->
 		AnimatedContent(
 			state,
-			modifier = Modifier.fillMaxSize()
+			modifier = Modifier.layerBackdrop(backdrop).fillMaxSize()
 		) { uiState ->
 			when (uiState) {
 				is UiState.Loading -> ArtGrid(

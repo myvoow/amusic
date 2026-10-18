@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.genre
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -68,6 +70,7 @@ fun GenreListScreen(
 		}
 	}
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = {
 			if (!nested) {
@@ -86,12 +89,13 @@ fun GenreListScreen(
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
 				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = genresState !is UiState.Loading,

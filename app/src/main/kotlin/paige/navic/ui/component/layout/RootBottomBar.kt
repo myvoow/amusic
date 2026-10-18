@@ -6,91 +6,54 @@
 
 package paige.navic.ui.component.layout
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.Backdrop
 import org.koin.compose.koinInject
 import paige.navic.di.LocalSizeClass
 import paige.navic.domain.manager.PreferenceManager
 import paige.navic.domain.model.settings.BottomBarCollapseMode
-import paige.navic.domain.model.settings.MiniPlayerStyle
-import paige.navic.ui.util.easedVerticalGradient
 
+/**
+ * Floating mini player above the floating tab bar. [backdrop] must be recorded
+ * by the screen content (`Modifier.layerBackdrop`), see [glass].
+ */
 @Composable
 fun RootBottomBar(
 	scrolled: Boolean,
-	modifier: Modifier = Modifier,
-	shadows: Boolean = true,
-	hideMiniPlayer: Boolean = false,
-	windowInsets: WindowInsets = WindowInsets.systemBars
+	backdrop: Backdrop,
+	modifier: Modifier = Modifier
 ) {
 	val sizeClass = LocalSizeClass.current
 	if (sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium) return
 
 	val preferenceManager = koinInject<PreferenceManager>()
-	val scrolled =
+	val collapsed =
 		scrolled && preferenceManager.bottomBarCollapseMode == BottomBarCollapseMode.OnScroll
-	val detached = preferenceManager.miniPlayerStyle == MiniPlayerStyle.Detached
-	val progress by animateFloatAsState(
-		targetValue = if (scrolled) 0f else 1f,
-		animationSpec = spring(
-			dampingRatio = Spring.DampingRatioLowBouncy,
-			stiffness = Spring.StiffnessMediumLow
-		)
-	)
-	val shadowFadeProgress by animateFloatAsState(
-		targetValue = if (scrolled || !shadows) 0f else 1f,
-		animationSpec = tween(durationMillis = 600)
-	)
 
 	Column(
-		modifier = modifier.then(
-			if (detached)
-				Modifier.background(
-					Brush.easedVerticalGradient(color = MaterialTheme.colorScheme.surface.copy(alpha = shadowFadeProgress))
-				)
-			else Modifier
-		)
-	) {
-		if (!hideMiniPlayer) {
-			MiniPlayer(
-				modifier = Modifier.graphicsLayer {
-					alpha = progress.coerceIn(0f..1f)
-					translationY = ((1f - progress) * (size.height * 2)).coerceAtLeast(
-						if (detached) -2048f else 0f
-					)
-				},
-				enabled = !scrolled,
-				windowInsets = windowInsets.only(WindowInsetsSides.Horizontal)
+		modifier = modifier
+			.windowInsetsPadding(
+				WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
 			)
+			.padding(horizontal = 16.dp, vertical = 8.dp)
+			.animateContentSize(),
+		verticalArrangement = Arrangement.spacedBy(8.dp)
+	) {
+		if (!collapsed) {
+			MiniPlayer(backdrop = backdrop)
 		}
-		BottomBar(
-			containerColor = if (detached)
-				NavigationBarDefaults.containerColor.copy(alpha = 0f)
-			else NavigationBarDefaults.containerColor,
-			modifier = Modifier.graphicsLayer {
-				alpha = progress.coerceIn(0f..1f)
-				translationY = ((1f - progress) * size.height).coerceAtLeast(
-					if (detached) -2048f else 0f
-				)
-			},
-			enabled = !scrolled,
-			windowInsets = windowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-		)
+		BottomBar(backdrop = backdrop, collapsed = collapsed)
 	}
 }

@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.library
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -122,15 +124,17 @@ fun LibraryScreen() {
 		}
 	}
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = { RootTopBar({ Text(stringResource(R.string.title_library)) }, scrollBehavior) },
 		bottomBar = {
 			val scrollManager = LocalBottomBarScrollManager.current
-			RootBottomBar(scrolled = scrollManager.isTriggered)
+			RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = albumsState !is UiState.Loading &&

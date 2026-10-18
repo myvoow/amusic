@@ -225,6 +225,7 @@ dependencies {
 
 	// Compose 3rd party
 	implementation(libs.capsule)
+	implementation(libs.backdrop)
 	implementation(libs.kmpalette.core)
 	implementation(libs.kmpalette.network)
 	implementation(libs.materialKolor)

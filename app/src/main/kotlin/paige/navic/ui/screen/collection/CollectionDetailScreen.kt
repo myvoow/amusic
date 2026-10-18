@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.collection
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -135,6 +137,7 @@ fun CollectionDetailScreen(
 	}
 
 	NavicTheme(colorScheme) {
+		val backdrop = rememberLayerBackdrop()
 		Scaffold(
 			topBar = {
 				CollectionDetailScreenTopBar(
@@ -164,12 +167,13 @@ fun CollectionDetailScreen(
 				val preferVisible =
 					preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 				if (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible) {
-					RootBottomBar(scrolled = scrollManager.isTriggered)
+					RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 				}
 			}
 		) { contentPadding ->
 			PullToRefreshBox(
 				modifier = Modifier
+					.layerBackdrop(backdrop)
 					.padding(top = contentPadding.calculateTopPadding())
 					.background(MaterialTheme.colorScheme.surface),
 				finished = collectionState !is UiState.Loading,

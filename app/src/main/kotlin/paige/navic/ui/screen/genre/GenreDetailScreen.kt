@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.genre
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +78,7 @@ fun GenreDetailScreen(
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = { NestedTopBar({ Text(genreName) }) },
 		bottomBar = {
@@ -84,12 +87,13 @@ fun GenreDetailScreen(
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = albumsState !is UiState.Loading &&

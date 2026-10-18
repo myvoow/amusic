@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.radio
 
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.scaleIn
@@ -101,6 +103,7 @@ fun RadioListScreen(
 		}
 	}
 
+	val backdrop = rememberLayerBackdrop()
 	Scaffold(
 		topBar = {
 			if (!nested) {
@@ -151,12 +154,13 @@ fun RadioListScreen(
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
 				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
-				RootBottomBar(scrolled = scrollManager.isTriggered)
+				RootBottomBar(scrolled = scrollManager.isTriggered, backdrop = backdrop)
 			}
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
+				.layerBackdrop(backdrop)
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = radiosState !is UiState.Loading,
