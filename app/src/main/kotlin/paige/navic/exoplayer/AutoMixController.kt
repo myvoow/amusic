@@ -16,7 +16,6 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.json.Json
 import paige.navic.domain.manager.PreferenceManager
 import paige.navic.domain.model.DomainReplayGain
@@ -121,7 +120,7 @@ class AutoMixController(
 			m.playWhenReady = main.playWhenReady
 			phase = Phase.Overlap
 			lastReport = -1
-			isMixing.value = plan is TransitionPlan.Mix
+			AutoMixState.isMixing.value = plan is TransitionPlan.Mix
 			if (debug) Log.d(TAG, "start $plan at A=${main.currentPosition} ms")
 		}
 	}
@@ -131,7 +130,7 @@ class AutoMixController(
 		val a = main.currentMediaItem
 		val b = if (next != C.INDEX_UNSET) main.getMediaItemAt(next) else null
 		val mode = preferenceManager.trackTransition
-		val key = "$mode|${tracks.value.size}|${main.currentMediaItemIndex}:${a?.mediaId}>$next:${b?.mediaId}"
+		val key = "$mode|${AutoMixState.tracks.value.size}|${main.currentMediaItemIndex}:${a?.mediaId}>$next:${b?.mediaId}"
 		if (key != planKey) {
 			cancel("queue changed")
 			planKey = key
@@ -199,7 +198,7 @@ class AutoMixController(
 		}
 		main.volume = 0f
 		m.volume = 1f
-		isMixing.value = false
+		AutoMixState.isMixing.value = false
 		// the main player takes B over silently; the lead covers its rebuffering, follow() the rest
 		ownsMainSpeed = true
 		main.playbackParameters = m.playbackParameters
@@ -253,11 +252,11 @@ class AutoMixController(
 		if (ownsMainSpeed) main.playbackParameters = PlaybackParameters.DEFAULT
 		ownsMainSpeed = false
 		phase = Phase.Idle
-		isMixing.value = false
+		AutoMixState.isMixing.value = false
 	}
 
 	private fun MediaItem.mixTrack(durationMs: Long?) = MixTrack(
-		analysis = tracks.value[mediaId],
+		analysis = AutoMixState.tracks.value[mediaId],
 		durationSeconds = (durationMs ?: 0L) / 1000.0,
 		albumId = mediaMetadata.extras?.getString(EXTRA_ALBUM_ID),
 		albumTitle = mediaMetadata.albumTitle?.toString(),
@@ -288,11 +287,5 @@ class AutoMixController(
 		private const val TICK_MS = 25L
 		private const val IDLE_TICK_MS = 500L
 		private const val CORRECTION_EVERY_TICKS = 8
-
-		/** automix.json entries by Navidrome song id, filled at startup. */
-		val tracks = MutableStateFlow<Map<String, AutoMixAnalysis>>(emptyMap())
-
-		/** True while two songs are mixed (the now playing screen shows "Mixing"). */
-		val isMixing = MutableStateFlow(false)
 	}
 }

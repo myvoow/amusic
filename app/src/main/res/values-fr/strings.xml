@@ -503,4 +503,9 @@
     <string name="action_copy">Copier</string>
     <string name="info_equalizer_unsupported">Votre appareil ne prend pas en charge cette fonctionnalité.</string>
     <string name="info_equalizer_mode_not_builtin">Veuillez régler l\'égaliseur externe via son application dédiée.</string>
+    <string name="option_track_transition">Transition entre les morceaux</string>
+    <string name="option_track_transition_crossfade">Fondu enchaîné</string>
+    <string name="option_track_transition_none">Aucune</string>
+    <string name="option_automix_url">Adresse des données AutoMix</string>
+    <string name="subtitle_automix_url">automix.json sur votre serveur, vide = AutoMix désactivé</string>
 </resources>

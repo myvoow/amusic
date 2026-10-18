@@ -25,6 +25,12 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 import paige.navic.R
+import paige.navic.exoplayer.AutoMixState
+import paige.navic.exoplayer.TrackTransition
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
 import paige.navic.discord.ExoDiscordIntegration
@@ -77,7 +83,7 @@ fun SettingsPlaybackScreen() {
 						onClick = dropUnlessResumed { backStack.add(Screen.Settings.StreamingQuality) },
 						content = { Text(stringResource(R.string.title_streaming_quality)) },
 						supportingContent = { Text(stringResource(R.string.subtitle_streaming_quality)) },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 6)
 					)
 					SettingsChoiceItem(
 						choices = ExplicitContentPlayback.entries.toImmutableList(),
@@ -85,7 +91,7 @@ fun SettingsPlaybackScreen() {
 						onChoiceSelected = { preferenceManager.explicitContentPlayback = it },
 						content = { Text(stringResource(R.string.option_explicit_playback)) },
 						label = { stringResource(it.displayName) },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 6)
 					)
 					SettingsNavItem(
 						onClick = dropUnlessResumed { backStack.add(Screen.Settings.Effects) },
@@ -93,7 +99,7 @@ fun SettingsPlaybackScreen() {
 						supportingContent = { Text(stringResource(R.string.subtitle_audio_effects)) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(
 							index = 2,
-							count = 4
+							count = 6
 						)
 					)
 					SettingsToggleItem(
@@ -103,8 +109,29 @@ fun SettingsPlaybackScreen() {
 						supportingContent = { Text(stringResource(R.string.subtitle_auto_fill_queue)) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(
 							index = 3,
-							count = 4
+							count = 6
 						)
+					)
+					SettingsChoiceItem(
+						choices = TrackTransition.entries.toImmutableList(),
+						selectedChoice = preferenceManager.trackTransition,
+						onChoiceSelected = { preferenceManager.trackTransition = it },
+						content = { Text(stringResource(R.string.option_track_transition)) },
+						label = { stringResource(it.label) },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 6)
+					)
+					val context = LocalContext.current
+					val scope = rememberCoroutineScope()
+					SettingsInputItem(
+						value = preferenceManager.autoMixUrl,
+						onValueChanged = { url ->
+							preferenceManager.autoMixUrl = url.trim()
+							scope.launch(Dispatchers.IO) { AutoMixState.load(context.filesDir, url.trim()) }
+						},
+						defaultValue = "",
+						content = { Text(stringResource(R.string.option_automix_url)) },
+						supportingContent = { Text(stringResource(R.string.subtitle_automix_url)) },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 5, count = 6)
 					)
 				}
 
@@ -193,3 +220,10 @@ fun SettingsPlaybackScreen() {
 		}
 	}
 }
+
+val TrackTransition.label
+	get() = when (this) {
+		TrackTransition.AutoMix -> R.string.option_track_transition_automix
+		TrackTransition.Crossfade -> R.string.option_track_transition_crossfade
+		TrackTransition.None -> R.string.option_track_transition_none
+	}

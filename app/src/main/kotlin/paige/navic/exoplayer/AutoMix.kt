@@ -6,7 +6,12 @@
 
 package paige.navic.exoplayer
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URI
 import java.text.Normalizer
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -35,6 +40,43 @@ data class AutoMixAnalysis(
 data class AutoMixFile(val version: Int, val tracks: Map<String, AutoMixAnalysis>)
 
 enum class TrackTransition { AutoMix, Crossfade, None }
+
+object AutoMixState {
+	/** automix.json entries by Navidrome song id. */
+	val tracks = MutableStateFlow<Map<String, AutoMixAnalysis>>(emptyMap())
+
+	/** True while two songs are mixed (the now playing screen shows "Mixing"). */
+	val isMixing = MutableStateFlow(false)
+
+	private val json = Json { ignoreUnknownKeys = true }
+
+	/**
+	 * One request for the whole library, ETag-aware; falls back to the copy cached in [dir] when
+	 * the server can't be reached (it is LAN only). Empty [url] turns AutoMix off.
+	 */
+	fun load(dir: File, url: String) {
+		val cache = File(dir, "automix.json")
+		val etag = File(dir, "automix.etag")
+		if (url.isBlank()) {
+			tracks.value = emptyMap()
+			return
+		}
+		runCatching {
+			val c = URI(url).toURL().openConnection() as HttpURLConnection
+			c.connectTimeout = 5_000
+			c.readTimeout = 30_000
+			if (cache.exists() && etag.exists()) c.setRequestProperty("If-None-Match", etag.readText())
+			if (c.responseCode == HttpURLConnection.HTTP_OK) {
+				val tmp = File(dir, "automix.json.tmp")
+				c.inputStream.use { input -> tmp.outputStream().use { input.copyTo(it) } }
+				tmp.renameTo(cache)
+				c.getHeaderField("ETag")?.let { etag.writeText(it) } ?: etag.delete()
+			}
+			c.disconnect()
+		}
+		tracks.value = runCatching { json.decodeFromString<AutoMixFile>(cache.readText()).tracks }.getOrDefault(emptyMap())
+	}
+}
 
 data class MixTrack(
 	val analysis: AutoMixAnalysis?,

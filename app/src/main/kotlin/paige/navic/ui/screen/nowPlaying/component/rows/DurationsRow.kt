@@ -7,7 +7,13 @@
 package paige.navic.ui.screen.nowPlaying.component.rows
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import paige.navic.exoplayer.AutoMixState
+import paige.navic.R
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,7 +47,7 @@ fun NowPlayingDurationsRow() {
 		when {
 			duration == kotlin.time.Duration.ZERO -> {
 				Text(text = "LIVE", color = color, style = style)
-				Spacer(Modifier.weight(1f))
+				MixingLabel(style)
 				Text(text = "∞", color = color, style = style)
 			}
 
@@ -51,7 +57,7 @@ fun NowPlayingDurationsRow() {
 					text = elapsed.toHoursMinutesSeconds(),
 					color = color, style = style
 				)
-				Spacer(Modifier.weight(1f))
+				MixingLabel(style)
 				Text(
 					"-" + (duration - elapsed).coerceAtLeast(kotlin.time.Duration.ZERO).toHoursMinutesSeconds(),
 					color = color, style = style
@@ -60,9 +66,18 @@ fun NowPlayingDurationsRow() {
 
 			else -> {
 				Text("--:--", color = color, style = style)
-				Spacer(Modifier.weight(1f))
+				MixingLabel(style)
 				Text("--:--", color = color, style = style)
 			}
 		}
+	}
+}
+
+/** Apple Music style "Mixing" between the times while two songs overlap. */
+@Composable
+private fun RowScope.MixingLabel(style: TextStyle) {
+	val mixing by AutoMixState.isMixing.collectAsState()
+	Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+		if (mixing) Text(stringResource(R.string.info_mixing), style = style, color = MaterialTheme.colorScheme.onSurface)
 	}
 }

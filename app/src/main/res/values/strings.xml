@@ -532,4 +532,11 @@
 	<string name="info_chat_unsupported">Your server does not support this feature, or you are offline</string>
 	<string name="info_content_unavailable">Nothing here</string>
 	<string name="action_allow">Allow</string>
+	<string name="option_track_transition">Song transitions</string>
+	<string name="option_track_transition_automix">AutoMix</string>
+	<string name="option_track_transition_crossfade">Crossfade</string>
+	<string name="option_track_transition_none">None</string>
+	<string name="option_automix_url">AutoMix data address</string>
+	<string name="subtitle_automix_url">automix.json on your server, empty turns AutoMix off</string>
+	<string name="info_mixing">Mixing</string>
 </resources>

@@ -81,6 +81,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 			autoMix = AutoMixController(stateHolder, preferenceManager)
 			player.addListener(autoMix)
+			scope.launch(Dispatchers.IO) { AutoMixState.load(filesDir, preferenceManager.autoMixUrl) }
 
 			exoEqualizerManager.apply {
 				applyEqualizerMode(equalizerManager.config.value.mode)

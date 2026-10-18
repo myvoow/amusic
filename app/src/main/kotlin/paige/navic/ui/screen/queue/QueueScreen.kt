@@ -47,6 +47,15 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
+import paige.navic.ui.screen.settings.label
+import paige.navic.ui.icons.outlined.AutoMix
+import paige.navic.ui.icons.Icons
+import paige.navic.exoplayer.TrackTransition
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Icon
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSheetState
 import paige.navic.domain.manager.PreferenceManager
@@ -179,16 +188,38 @@ fun QueueScreen() {
 						textAlign = TextAlign.Center
 					)
 				}
-				FilledTonalButton(
-					onClick = {
-						haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-						player.clearQueue()
-					},
-					colors = ButtonDefaults.filledTonalButtonColors(),
-					contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-					modifier = Modifier.height(36.dp)
-				) {
-					Text(stringResource(R.string.action_clear_queue))
+				Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+					// song transitions, same three choices as in the playback settings
+					val transition = preferenceManager.trackTransition
+					FilledTonalButton(
+						onClick = {
+							preferenceManager.trackTransition =
+								TrackTransition.entries[(transition.ordinal + 1) % TrackTransition.entries.size]
+						},
+						contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+						modifier = Modifier.height(36.dp)
+					) {
+						Icon(
+							Icons.Outlined.AutoMix,
+							contentDescription = stringResource(R.string.option_track_transition),
+							tint = if (transition == TrackTransition.AutoMix) MaterialTheme.colorScheme.primary
+							else LocalContentColor.current,
+							modifier = Modifier.size(18.dp)
+						)
+						Spacer(Modifier.width(6.dp))
+						Text(stringResource(transition.label))
+					}
+					FilledTonalButton(
+						onClick = {
+							haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+							player.clearQueue()
+						},
+						colors = ButtonDefaults.filledTonalButtonColors(),
+						contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+						modifier = Modifier.height(36.dp)
+					) {
+						Text(stringResource(R.string.action_clear_queue))
+					}
 				}
 			}
 		}
